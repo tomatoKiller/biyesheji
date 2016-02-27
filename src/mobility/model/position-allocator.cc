@@ -405,7 +405,7 @@ RandomDiscPositionAllocator::GetNext (void) const
   double x = m_x + std::cos (theta) * rho;
   double y = m_y + std::sin (theta) * rho;
   NS_LOG_DEBUG ("Disc position x=" << x << ", y=" << y);
-  return Vector (x, y, 0.0);
+  return Vector (x, y, 1.7);
 }
 
 int64_t

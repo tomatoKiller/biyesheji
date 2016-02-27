@@ -1,5 +1,6 @@
 
 import sys
+import os
 
 CqiToDataRate = [
 	0, 
@@ -20,31 +21,32 @@ CqiToDataRate = [
 	933.19
 ]
 
+for rt, dirs, filenames in os.walk(sys.argv[1]):
+	for files in filenames:
+		fp = open(rt + '/' + files)
 
-fp = open(sys.argv[1])
+		throughput = 0
+		slot = 0
+		line_num = 0
+		begin = False
 
-throughput = 0
-slot = 0
-line_num = 0
-begin = False
+		for line in fp:
+			line = line.strip('\n')
+			term = line.split('\t')
+			if term[0] == '0.41' or term[0] == '0.411' :
+				begin = True
 
-for line in fp:
-	line = line.strip('\n')
-	term = line.split('\t')
-	if term[0] == '0.042':
-		begin = True
+			if begin == False:
+				continue
 
-	if begin == False:
-		continue
+			throughput += CqiToDataRate[int(term[-2])] * int(term[-1])
+			# if slot == term[0]:
+			# 	throughput += CqiToDataRate[int(term[-2])]
+				
+			if slot != term[0]:
+				line_num+=1
+					# print throughput
+				slot = term[0]
+				# throughput = 0
 
-	throughput += CqiToDataRate[int(term[-2])]
-	# if slot == term[0]:
-	# 	throughput += CqiToDataRate[int(term[-2])]
-		
-	if slot != term[0]:
-		line_num+=1
-			# print throughput
-		slot = term[0]
-		# throughput = 0
-
-print throughput / line_num
+		print files, throughput / line_num

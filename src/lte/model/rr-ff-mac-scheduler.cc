@@ -1406,6 +1406,7 @@ RrFfMacScheduler::DoSchedUlTriggerReq (const struct FfMacSchedSapProvider::Sched
         {
           m_allocationMaps.insert (std::pair <uint16_t, std::vector <uint16_t> > (params.m_sfnSf, rbgAllocationMap));
           m_schedSapUser->SchedUlConfigInd (ret);
+          // std::cout<<"1111111111111111"<<std::endl;
         }
       return;  // no flows to be scheduled
     }
@@ -1527,7 +1528,9 @@ RrFfMacScheduler::DoSchedUlTriggerReq (const struct FfMacSchedSapProvider::Sched
         {
           // no cqi info about this UE
           uldci.m_mcs = 0; // MCS 0 -> UL-AMC TBD
+          // uldci.m_cqi = 1;
           NS_LOG_INFO (this << " UE does not have ULCQI " << (*it).first );
+          // std::cout<<"222222222222222"<<std::endl;
         }
       else
         {
@@ -1540,6 +1543,7 @@ RrFfMacScheduler::DoSchedUlTriggerReq (const struct FfMacSchedSapProvider::Sched
                   minSinr = (*itCqi).second.at (i);
                 }
             }
+            NS_LOG_INFO (this << " UE " << (*it).first <<" ULCQI minSinr " << minSinr );
           // translate SINR -> cqi: WILD ACK: same as DL
           double s = log2 ( 1 + (
                                  std::pow (10, minSinr / 10 )  /
@@ -1564,7 +1568,7 @@ RrFfMacScheduler::DoSchedUlTriggerReq (const struct FfMacSchedSapProvider::Sched
               continue; // CQI == 0 means "out of range" (see table 7.2.3-1 of 36.213)
             }
           uldci.m_mcs = m_amc->GetMcsFromCqi (cqi);
-          // std::cout<<"rrffmac"<<std::endl;
+          // std::cout<<cqi<<std::endl;
           uldci.m_cqi = cqi;
         }
       uldci.m_tbSize = (m_amc->GetTbSizeFromMcs (uldci.m_mcs, rbPerFlow) / 8); // MCS 0 -> UL-AMC TBD
@@ -1769,6 +1773,10 @@ RrFfMacScheduler::DoSchedUlCqiInfoReq (const struct FfMacSchedSapProvider::Sched
                 (*itTimers).second = m_cqiTimersThreshold;
 
               }
+
+              NS_LOG_INFO (this << " RNTI " << (*itMap).second.at (i) << " PUSCH-CQI " << sinr);
+              // NS_LOG_INFO (this << " RNTI " << itMap->second.at(i)<<"");
+              // NS_LOG_INFO (this <<" RNTI " << (*itMap).second.at (i) <<"");
 
           }
         // remove obsolete info on allocation

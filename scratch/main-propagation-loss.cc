@@ -21,6 +21,7 @@
 #include "ns3/propagation-loss-model.h"
 #include "ns3/jakes-propagation-loss-model.h"
 #include "ns3/constant-position-mobility-model.h"
+#include "ns3/itu-r-1411-nlos-over-rooftop-propagation-loss-model.h"
 
 #include "ns3/config.h"
 #include "ns3/string.h"
@@ -63,18 +64,18 @@ TestDeterministic (Ptr<PropagationLossModel> model)
   plot.AppendExtra ("set ylabel 'rxPower (dBm)'");
   plot.AppendExtra ("set key top right");
 
-  double txPowerDbm = +20; // dBm
+  double txPowerDbm = +40; // dBm
 
   Gnuplot2dDataset dataset;
 
   dataset.SetStyle (Gnuplot2dDataset::LINES);
 
   {
-    a->SetPosition (Vector (0.0, 0.0, 0.0));
+    a->SetPosition (Vector (0.0, 0.0, 5));
 
     for (double distance = 0.0; distance < 2500.0; distance += 10.0)
       {
-        b->SetPosition (Vector (distance, 0.0, 0.0));
+        b->SetPosition (Vector (distance, 0.0, 5));
 
         // CalcRxPower() returns dBm.
         double rxPowerDbm = model->CalcRxPower (txPowerDbm, a, b);
@@ -225,6 +226,14 @@ int main (int argc, char *argv[])
 
     Gnuplot plot = TestDeterministic (friis);
     plot.SetTitle ("ns3::FriisPropagationLossModel (Default Parameters)");
+    gnuplots.AddPlot (plot);
+  }
+
+  {
+    Ptr<ItuR1411NlosOverRooftopPropagationLossModel> itur = CreateObject<ItuR1411NlosOverRooftopPropagationLossModel> ();
+
+    Gnuplot plot = TestDeterministic (itur);
+    plot.SetTitle ("ns3::ItuR1411NlosOverRooftopPropagationLossModel (Default Parameters)");
     gnuplots.AddPlot (plot);
   }
 

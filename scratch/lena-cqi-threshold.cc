@@ -35,7 +35,7 @@ CourseChange (std::string foo, Ptr<const MobilityModel> mobility)
 {
   // Vector pos = mobility->GetPosition ();
   // Vector vel = mobility->GetVelocity ();
-  // std::cout << Simulator::Now () << ", model=" << mobility << ", POS: x=" << pos.x << ", y=" << pos.y
+  // std::cout << Simulator::Now () <<" " <<foo<< ", model=" << mobility << ", POS: x=" << pos.x << ", y=" << pos.y
   //           << ", z=" << pos.z << "; VEL:" << vel.x << ", y=" << vel.y
   //           << ", z=" << vel.z << std::endl;
 }
@@ -48,6 +48,9 @@ int main (int argc, char *argv[])
     int runnum = 0;
     std::string outputName = "macOutput/UlMacStats_";
 
+    // LogComponentEnable("RrFfMacScheduler",LOG_LEVEL_INFO);
+
+
 	
   // to save a template default attribute file run it like this:
   // ./waf --command-template="%s --ns3::ConfigStore::Filename=input-defaults.txt --ns3::ConfigStore::Mode=Save --ns3::ConfigStore::FileFormat=RawText" --run src/lte/examples/lena-first-sim
@@ -55,14 +58,21 @@ int main (int argc, char *argv[])
   // to load a previously created default attribute file
   // ./waf --command-template="%s --ns3::ConfigStore::Filename=input-defaults.txt --ns3::ConfigStore::Mode=Load --ns3::ConfigStore::FileFormat=RawText" --run src/lte/examples/lena-first-sim
 
-    while(runnum++ < 2)
+    runnum = 3;
+    while(runnum++ < 10)
   {
+    if (runnum == 5)
+    {
+      break;
+    }
     Config::SetDefault ("ns3::ConfigStore::Filename", StringValue ("input-defaults.txt"));
     Config::SetDefault ("ns3::ConfigStore::Mode", StringValue ("Load"));
     Config::SetDefault ("ns3::ConfigStore::FileFormat", StringValue ("RawText"));
 
+    int ueNum = 100 + (runnum - 1) * 20;
+
     std::stringstream ss;
-    ss<<runnum;
+    ss<<ueNum;
     std::string str;
     ss>>str;
     Config::SetDefault("ns3::MacStatsCalculator::UlOutputFilename", StringValue (outputName + str));
@@ -76,21 +86,29 @@ int main (int argc, char *argv[])
     cmd.Parse (argc, argv);
 
     Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
-    // lteHelper->SetPathlossModelType ("ns3::FriisSpectrumPropagationLossModel");
+    // lteHelper->SetPathlossModelType ("ns3::FriisPropagationLossModel");
 
+    lteHelper->SetFadingModel("ns3::TraceFadingLossModel");
+    lteHelper->SetFadingModelAttribute(
+      "TraceFilename", StringValue ("src/lte/model/fading-traces/fading_trace_EPA_3kmph.fad"));
+    lteHelper->SetFadingModelAttribute ("TraceLength", TimeValue (Seconds (10.0)));
+    lteHelper->SetFadingModelAttribute ("SamplesNum", UintegerValue (10000));
+    lteHelper->SetFadingModelAttribute ("WindowSize", TimeValue (Seconds (0.5)));
+    lteHelper->SetFadingModelAttribute ("RbNum", UintegerValue (50));
 
-    // lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (100));
-    // lteHelper->SetEnbDeviceAttribute ("UlEarfcn", UintegerValue (18100));
 
 
     NodeContainer enbNodes;
     NodeContainer ueNodes;
     enbNodes.Create (1);
-    ueNodes.Create (20 + (runnum - 1) * 20);
+    ueNodes.Create (ueNum);
 
     // Install Mobility Model
     MobilityHelper mobility;
+    Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+    positionAlloc->Add (Vector (0.0, 0.0, 35));
     mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+    mobility.SetPositionAllocator(positionAlloc);
     mobility.Install (enbNodes);
     BuildingsHelper::Install (enbNodes);
 
@@ -99,12 +117,14 @@ int main (int argc, char *argv[])
                                  "X", StringValue ("0.0"),
                                  "Y", StringValue ("0.0"),
                                  "Theta", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=6.2830]"),
-                                 "Rho", StringValue ("ns3::UniformRandomVariable[Min=100|Max=2500]"));
+                                 "Rho", StringValue ("ns3::UniformRandomVariable[Min=50|Max=500]"));
+
+      
   mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel",
                              "Mode", StringValue ("Time"),
-                             "Time", StringValue ("0.01"),
+                             "Time", StringValue ("0.5"),
                              "Speed", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"),
-                             "Bounds", StringValue ("-2500|2500|-2500|2500"));
+                             "Bounds", StringValue ("-500|500|-500|500"));
   mobility.Install (ueNodes);
 
   Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
@@ -119,11 +139,11 @@ int main (int argc, char *argv[])
   NetDeviceContainer ueDevs;
   // lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler");
   // lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
-  lteHelper->SetSchedulerAttribute ("CqiTimerThreshold", UintegerValue (3));
+  // lteHelper->SetSchedulerAttribute ("CqiTimerThreshold", UintegerValue (2));
   enbDevs = lteHelper->InstallEnbDevice (enbNodes);
   ueDevs = lteHelper->InstallUeDevice (ueNodes);
   
-  lteHelper->EnableRlcTraces();
+  // lteHelper->EnableRlcTraces();
   lteHelper->EnableMacTraces();
 
   // Attach a UE to a eNB
@@ -137,7 +157,7 @@ int main (int argc, char *argv[])
     EpsBearer bearer (q);
     lteHelper->ActivateDataRadioBearer (ueDevs, bearer);
 
-    Simulator::Stop (Seconds (0.1));
+    Simulator::Stop (Seconds (4));
 
     Simulator::Run ();
 

@@ -1109,8 +1109,13 @@ LteEnbMac::DoSchedUlConfigInd (FfMacSchedSapUser::SchedUlConfigIndParameters ind
   for (  uint32_t i  = 0; i < ind.m_dciList.size (); i++ )
     {
 /*88888888888888888888888888888*/
+      // m_ulScheduling (m_frameNo, m_subframeNo, ind.m_dciList.at (i).m_rnti,
+      //                 ind.m_dciList.at (i).m_cqi, ind.m_dciList.at (i).m_tbSize);
+      // std::cout<<"LteEnbMac "<<(uint32_t)(ind.m_dciList)[i].m_mcs<<" haha"<<std::endl;
+
       m_ulScheduling (m_frameNo, m_subframeNo, ind.m_dciList.at (i).m_rnti,
-                      ind.m_dciList.at (i).m_cqi, ind.m_dciList.at (i).m_tbSize);
+                      ind.m_dciList.at (i).m_cqi, ind.m_dciList.at (i).m_rbLen);
+
 /*88888888888888888888888888888*/
     }
 
