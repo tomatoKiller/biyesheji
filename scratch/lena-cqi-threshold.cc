@@ -46,9 +46,10 @@ int main (int argc, char *argv[])
     cmd.Parse (argc, argv);
 
     int runnum = 0;
-    std::string outputName = "macOutput/UlMacStats_";
+    std::string ulOutputName = "macOutput/Ul/MacStats_";
+    std::string dlOutputName = "macOutput/Dl/MacStats_";
 
-    // LogComponentEnable("RrFfMacScheduler",LOG_LEVEL_INFO);
+    // LogComponentEnable("LteRlc",LOG_LEVEL_LOGIC);
 
 
 	
@@ -58,13 +59,13 @@ int main (int argc, char *argv[])
   // to load a previously created default attribute file
   // ./waf --command-template="%s --ns3::ConfigStore::Filename=input-defaults.txt --ns3::ConfigStore::Mode=Load --ns3::ConfigStore::FileFormat=RawText" --run src/lte/examples/lena-first-sim
 
-    runnum = 3;
+    // runnum = 8;
     while(runnum++ < 10)
   {
-    if (runnum == 5)
-    {
-      break;
-    }
+    // if (runnum == 2)
+    // {
+    //   break;
+    // }
     Config::SetDefault ("ns3::ConfigStore::Filename", StringValue ("input-defaults.txt"));
     Config::SetDefault ("ns3::ConfigStore::Mode", StringValue ("Load"));
     Config::SetDefault ("ns3::ConfigStore::FileFormat", StringValue ("RawText"));
@@ -75,7 +76,8 @@ int main (int argc, char *argv[])
     ss<<ueNum;
     std::string str;
     ss>>str;
-    Config::SetDefault("ns3::MacStatsCalculator::UlOutputFilename", StringValue (outputName + str));
+    Config::SetDefault("ns3::MacStatsCalculator::UlOutputFilename", StringValue (ulOutputName + str));
+    Config::SetDefault("ns3::MacStatsCalculator::DlOutputFilename", StringValue (dlOutputName + str));
 
 
     ConfigStore inputConfig;
@@ -117,14 +119,14 @@ int main (int argc, char *argv[])
                                  "X", StringValue ("0.0"),
                                  "Y", StringValue ("0.0"),
                                  "Theta", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=6.2830]"),
-                                 "Rho", StringValue ("ns3::UniformRandomVariable[Min=50|Max=500]"));
+                                 "Rho", StringValue ("ns3::UniformRandomVariable[Min=100|Max=1000]"));
 
       
   mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel",
                              "Mode", StringValue ("Time"),
                              "Time", StringValue ("0.5"),
                              "Speed", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"),
-                             "Bounds", StringValue ("-500|500|-500|500"));
+                             "Bounds", StringValue ("-1000|1000|-1000|1000"));
   mobility.Install (ueNodes);
 
   Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
@@ -157,7 +159,7 @@ int main (int argc, char *argv[])
     EpsBearer bearer (q);
     lteHelper->ActivateDataRadioBearer (ueDevs, bearer);
 
-    Simulator::Stop (Seconds (4));
+    Simulator::Stop (Seconds (2));
 
     Simulator::Run ();
 

@@ -93,6 +93,7 @@ struct DlDciListElement_s
   uint8_t   m_resAlloc;
   std::vector <uint16_t>  m_tbsSize;
   std::vector <uint8_t>   m_mcs;
+  std::vector <uint8_t>   m_cqi;
   std::vector <uint8_t>   m_ndi;
   std::vector <uint8_t>   m_rv;
   uint8_t   m_cceIndex;
@@ -135,6 +136,7 @@ struct UlDciListElement_s
   uint16_t  m_tbSize;
   uint8_t   m_mcs;
   uint8_t   m_cqi;
+  double    m_se;
   uint8_t   m_ndi;
   uint8_t   m_cceIndex;
   uint8_t   m_aggrLevel;

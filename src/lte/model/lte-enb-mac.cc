@@ -1031,12 +1031,27 @@ LteEnbMac::DoSchedDlConfigInd (FfMacSchedSapUser::SchedDlConfigIndParameters ind
   // Fire the trace with the DL information
   for (  uint32_t i  = 0; i < ind.m_buildDataList.size (); i++ )
     {
+      
+      uint32_t rbm = ind.m_buildDataList.at (i).m_dci.m_rbBitmap;
+      uint32_t rbLen = 0;
+      uint32_t rbgSize = 3;
+      while(rbm)
+      {
+        rbLen += rbgSize;
+        rbm = rbm & (rbm - 1);
+      }
+
       // Only one TB used
       if (ind.m_buildDataList.at (i).m_dci.m_tbsSize.size () == 1)
         {
+          // m_dlScheduling (m_frameNo, m_subframeNo, ind.m_buildDataList.at (i).m_dci.m_rnti,
+          //                 ind.m_buildDataList.at (i).m_dci.m_cqi.at (0),
+          //                 ind.m_buildDataList.at (i).m_dci.m_tbsSize.at (0),
+          //                 0, 0
+          //                 );
           m_dlScheduling (m_frameNo, m_subframeNo, ind.m_buildDataList.at (i).m_dci.m_rnti,
-                          ind.m_buildDataList.at (i).m_dci.m_mcs.at (0),
-                          ind.m_buildDataList.at (i).m_dci.m_tbsSize.at (0),
+                          ind.m_buildDataList.at (i).m_dci.m_cqi.at (0),
+                          rbLen,
                           0, 0
                           );
 
@@ -1044,11 +1059,17 @@ LteEnbMac::DoSchedDlConfigInd (FfMacSchedSapUser::SchedDlConfigIndParameters ind
       // Two TBs used
       else if (ind.m_buildDataList.at (i).m_dci.m_tbsSize.size () == 2)
         {
+          // m_dlScheduling (m_frameNo, m_subframeNo, ind.m_buildDataList.at (i).m_dci.m_rnti,
+          //                 ind.m_buildDataList.at (i).m_dci.m_cqi.at (0),
+          //                 ind.m_buildDataList.at (i).m_dci.m_tbsSize.at (0),
+          //                 ind.m_buildDataList.at (i).m_dci.m_cqi.at (1),
+          //                 ind.m_buildDataList.at (i).m_dci.m_tbsSize.at (1)
+          //                 );
           m_dlScheduling (m_frameNo, m_subframeNo, ind.m_buildDataList.at (i).m_dci.m_rnti,
-                          ind.m_buildDataList.at (i).m_dci.m_mcs.at (0),
-                          ind.m_buildDataList.at (i).m_dci.m_tbsSize.at (0),
-                          ind.m_buildDataList.at (i).m_dci.m_mcs.at (1),
-                          ind.m_buildDataList.at (i).m_dci.m_tbsSize.at (1)
+                          ind.m_buildDataList.at (i).m_dci.m_cqi.at (0),
+                          rbLen,
+                          ind.m_buildDataList.at (i).m_dci.m_cqi.at (1),
+                          rbLen
                           );
         }
       else

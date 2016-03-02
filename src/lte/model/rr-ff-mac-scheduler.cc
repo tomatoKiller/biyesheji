@@ -899,6 +899,7 @@ RrFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                       dci.m_ndi.push_back (0);
                       dci.m_rv.push_back (0);
                       dci.m_mcs.push_back (0);
+                      dci.m_cqi.push_back (0);
                       dci.m_tbsSize.push_back (0);
                       NS_LOG_INFO (this << " layer " << (uint16_t)j << " no txed (MIMO transition)");
 
@@ -917,6 +918,7 @@ RrFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                   dci.m_ndi.at (j) = 0;
                   dci.m_rv.at (j) = 0;
                   dci.m_mcs.at (j) = 0;
+                  dci.m_cqi.at (j) = 0;
                   dci.m_tbsSize.at (j) = 0;
                   NS_LOG_INFO (this << " layer " << (uint16_t)j << " no retx");
                 }
@@ -1123,10 +1125,12 @@ RrFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
           if (itCqi == m_p10CqiRxed.end ())
             {
               newDci.m_mcs.push_back (0); // no info on this user -> lowest MCS
+              newDci.m_cqi.push_back (0);
             }
           else
             {
               newDci.m_mcs.push_back ( m_amc->GetMcsFromCqi ((*itCqi).second) );
+              newDci.m_cqi.push_back ( (*itCqi).second );
             }
         }
       int tbSize = (m_amc->GetTbSizeFromMcs (newDci.m_mcs.at (0), rbgPerTb * rbgSize) / 8);
@@ -1570,6 +1574,7 @@ RrFfMacScheduler::DoSchedUlTriggerReq (const struct FfMacSchedSapProvider::Sched
           uldci.m_mcs = m_amc->GetMcsFromCqi (cqi);
           // std::cout<<cqi<<std::endl;
           uldci.m_cqi = cqi;
+          uldci.m_se = s;
         }
       uldci.m_tbSize = (m_amc->GetTbSizeFromMcs (uldci.m_mcs, rbPerFlow) / 8); // MCS 0 -> UL-AMC TBD
 

@@ -33,13 +33,18 @@ for rt, dirs, filenames in os.walk(sys.argv[1]):
 		for line in fp:
 			line = line.strip('\n')
 			term = line.split('\t')
+	
 			if term[0] == '0.41' or term[0] == '0.411' :
 				begin = True
 
 			if begin == False:
 				continue
 
-			throughput += CqiToDataRate[int(term[-2])] * int(term[-1])
+			if len(term) == 8:
+				throughput += CqiToDataRate[int(term[-2])] * int(term[-1])
+			elif len(term) == 10:
+				throughput += CqiToDataRate[int(term[-2])] * int(term[-1])
+				throughput += CqiToDataRate[int(term[-4])] * int(term[-3])
 			# if slot == term[0]:
 			# 	throughput += CqiToDataRate[int(term[-2])]
 				
